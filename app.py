@@ -931,6 +931,17 @@ def init_db():
                 db.session.rollback()
                 print(f"Error creating sample data: {e}")
 
+# Ensure database tables are created on startup if they don't exist
+with app.app_context():
+    # Check if any table exists (e.g., User table)
+    # This is a simple check to avoid recreating tables on every restart
+    # For more robust solutions, consider Flask-Migrate
+    try:
+        db.session.query(User).first()
+    except Exception as e:
+        print(f"Database tables not found or error: {e}. Initializing database...")
+        init_db()
+        print("Database initialization attempt completed.")
+
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=5000)
