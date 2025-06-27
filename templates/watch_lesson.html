@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="/" class="flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+            Kurslar ro'yxatiga qaytish
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <!-- Video Player -->
+        <div class="lg:col-span-3">
+            <div class="card">
+                <h1 class="text-2xl font-bold text-gray-800 mb-4">{{ lesson.title }}</h1>
+                
+                {% if lesson.video_url %}
+                <div class="relative bg-black rounded-lg overflow-hidden mb-6">
+                    <video 
+                        controls 
+                        class="w-full h-auto max-h-96"
+                        poster="{{ course.image_url }}"
+                    >
+                        <source src="{{ lesson.video_url }}" type="video/mp4">
+                        <source src="{{ lesson.video_url }}" type="video/webm">
+                        <source src="{{ lesson.video_url }}" type="video/ogg">
+                        Sizning brauzeringiz video formatini qo'llab-quvvatlamaydi.
+                    </video>
+                </div>
+                {% else %}
+                <div class="bg-gray-100 rounded-lg p-12 text-center mb-6">
+                    <i data-lucide="video-off" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-600 mb-2">Video mavjud emas</h3>
+                    <p class="text-gray-500">Bu dars uchun video hali yuklanmagan</p>
+                </div>
+                {% endif %}
+
+                <!-- Lesson Content -->
+                {% if lesson.content %}
+                <div class="prose max-w-none">
+                    <h3 class="text-lg font-semibold mb-3">Dars tarkibi</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-gray-700 leading-relaxed">{{ lesson.content }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Course Info Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="card sticky top-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">{{ course.title }}</h3>
+                
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="user" class="w-4 h-4 text-gray-400 mr-2"></i>
+                        <span class="text-gray-700">{{ course.instructor.name }}</span>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <i data-lucide="clock" class="w-4 h-4 text-gray-400 mr-2"></i>
+                        <span class="text-gray-700">{{ lesson.duration }}</span>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <i data-lucide="tag" class="w-4 h-4 text-gray-400 mr-2"></i>
+                        <span class="text-gray-700">{{ course.category }}</span>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <i data-lucide="signal" class="w-4 h-4 text-gray-400 mr-2"></i>
+                        <span class="text-gray-700 capitalize">{{ course.level }}</span>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Course Lessons -->
+                <h4 class="font-semibold text-gray-800 mb-3">Kurs darslari</h4>
+                <div class="space-y-2 max-h-64 overflow-y-auto">
+                    {% for course_lesson in course.lessons %}
+                    <div class="flex items-center justify-between p-2 rounded-lg {{ 'bg-blue-50 border border-blue-200' if course_lesson.id == lesson.id else 'hover:bg-gray-50' }} transition-colors">
+                        <div class="flex items-center flex-1">
+                            <span class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium mr-2">
+                                {{ course_lesson.order_index }}
+                            </span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-800 truncate">{{ course_lesson.title }}</p>
+                                <p class="text-xs text-gray-500">{{ course_lesson.duration }}</p>
+                            </div>
+                        </div>
+                        
+                        {% if course_lesson.is_free %}
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Bepul</span>
+                        {% endif %}
+                        
+                        {% if course_lesson.id == lesson.id %}
+                        <i data-lucide="play-circle" class="w-4 h-4 text-blue-600 ml-2"></i>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    {% if not lesson.is_free %}
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600 mb-2">Bu premium dars</p>
+                        <button onclick="addToCart({{ course.id }})" class="btn-primary w-full">
+                            <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i>
+                            Kursni sotib olish
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="/" class="btn-secondary w-full text-center">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                        Boshqa kurslar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

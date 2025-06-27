@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Udemy Clone{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .btn-primary {
+            @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2.5 px-5 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl;
+        }
+        
+        .btn-secondary {
+            @apply bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 font-medium py-2.5 px-5 rounded-lg transition-all duration-300 border border-gray-300 hover:border-gray-400;
+        }
+        
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-all duration-300 hover:shadow-2xl hover:border-gray-200;
+        }
+        
+        .input-field {
+            @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white hover:border-gray-400;
+        }
+
+        .cart-badge {
+            @apply absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-lg;
+        }
+
+        /* Enhanced Alert Styles */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-alert.show {
+            transform: translateX(0);
+        }
+
+        .custom-alert.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .custom-alert.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .custom-alert.info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .custom-alert.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        /* Responsive Navigation */
+        @media (max-width: 768px) {
+            .nav-desktop {
+                display: none;
+            }
+            .nav-mobile {
+                display: flex;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .nav-desktop {
+                display: flex;
+            }
+            .nav-mobile {
+                display: none;
+            }
+        }
+
+        /* Enhanced Loading Animation */
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Enhanced hover effects */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* File upload styles */
+        .file-upload {
+            @apply relative overflow-hidden inline-block cursor-pointer;
+        }
+
+        .file-upload input[type=file] {
+            @apply absolute left-0 top-0 opacity-0 cursor-pointer w-full h-full;
+        }
+
+        .file-upload-label {
+            @apply bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2 cursor-pointer;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            @apply w-full bg-gray-200 rounded-full h-2;
+        }
+
+        .progress-fill {
+            @apply bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Custom Alert Container -->
+    <div id="alertContainer"></div>
+
+    <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center space-x-2 hover-lift">
+                        <i data-lucide="graduation-cap" class="w-8 h-8 text-blue-600"></i>
+                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">OnlineTalim</span>
+                    </a>
+                </div>
+
+                <!-- Search Bar - Desktop -->
+                <div class="hidden md:flex flex-1 max-w-lg mx-8">
+                    <div class="relative w-full">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                        <input
+                            type="text"
+                            placeholder="Kurslarni qidiring..."
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                            id="searchInput"
+                        />
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="nav-desktop items-center space-x-4" id="navButtons">
+                    <button onclick="showAuthModal('login')" class="btn-secondary">
+                        <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                        Kirish
+                    </button>
+                    <button onclick="showAuthModal('register')" class="btn-primary">
+                        <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                        Ro'yxatdan o'tish
+                    </button>
+                </div>
+
+                <!-- User Menu - Desktop -->
+                <div class="nav-desktop items-center space-x-4 hidden" id="userMenu">
+                    <!-- Cart Icon -->
+                    <div class="relative">
+                        <a href="/cart" class="text-gray-600 hover:text-gray-800 transition-colors p-2 rounded-lg hover:bg-gray-100 hover-lift">
+                            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                            <span id="cartBadge" class="cart-badge hidden">0</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleProfileMenu()" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 hover-lift">
+                            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium shadow-lg">
+                                <span id="userInitial">U</span>
+                            </div>
+                            <span id="userName" class="hidden lg:block font-medium"></span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                            <div class="py-2">
+                                <a href="/profile" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="user" class="w-4 h-4 mr-3"></i>
+                                    Profil
+                                </a>
+                                <a href="/cart" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i>
+                                    Savatcha
+                                </a>
+                                <div id="instructorLink" class="hidden">
+                                    <a href="/instructor/dashboard" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i data-lucide="graduation-cap" class="w-4 h-4 mr-3"></i>
+                                        Dashboard
+                                    </a>
+                                </div>
+                                <hr class="my-2">
+                                <button onclick="logout()" class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
+                                    Chiqish
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="nav-mobile">
+                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Search -->
+            <div class="md:hidden pb-4">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                    <input
+                        type="text"
+                        placeholder="Kurslarni qidiring..."
+                        class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        id="searchInputMobile"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-200">
+            <div class="px-4 py-4 space-y-4">
+                <div id="mobileNavButtons">
+                    <button onclick="showAuthModal('login')" class="btn-secondary w-full mb-2 justify-center">
+                        <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                        Kirish
+                    </button>
+                    <button onclick="showAuthModal('register')" class="btn-primary w-full justify-center">
+                        <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i>
+                        Ro'yxatdan o'tish
+                    </button>
+                </div>
+                
+                <div id="mobileUserMenu" class="hidden space-y-2">
+                    <a href="/profile" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="user" class="w-4 h-4 mr-3"></i>
+                        Profil
+                    </a>
+                    <a href="/cart" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 mr-3"></i>
+                        Savatcha
+                        <span id="mobileCartBadge" class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 hidden">0</span>
+                    </a>
+                    <div id="mobileInstructorLink" class="hidden">
+                        <a href="/instructor/dashboard" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                            <i data-lucide="graduation-cap" class="w-4 h-4 mr-3"></i>
+                            Dashboard
+                        </a>
+                    </div>
+                    <button onclick="logout()" class="flex items-center w-full px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                        <i data-lucide="log-out" class="w-4 h-4 mr-3"></i>
+                        Chiqish
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Enhanced Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0 shadow-2xl" id="authModalContent">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Kirish</h2>
+                <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <form id="authForm">
+                <div id="nameField" class="mb-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Ism</label>
+                    <input type="text" id="name" class="input-field" placeholder="Ismingizni kiriting">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" class="input-field" placeholder="Email manzilingizni kiriting" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Parol</label>
+                    <input type="password" id="password" class="input-field" placeholder="Parolingizni kiriting" required>
+                </div>
+
+                <div id="roleField" class="mb-6 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                    <select id="role" class="input-field">
+                        <option value="student">Talaba</option>
+                        <option value="instructor">O'qituvchi</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary w-full mb-4 py-3 text-lg justify-center" id="authSubmitBtn">
+                    <span id="submitText">Kirish</span>
+                    <div class="loading-spinner hidden ml-2"></div>
+                </button>
+
+                <div class="text-center">
+                    <button type="button" id="switchMode" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                        Ro'yxatdan o'tish
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let currentUser = null;
+        let isLoginMode = true;
+
+        // Enhanced Alert Function
+        function showAlert(message, type = 'info', duration = 5000) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const icons = {
+                success: 'check-circle',
+                error: 'x-circle',
+                info: 'info',
+                warning: 'alert-triangle'
+            };
+            
+            const alertHTML = `
+                <div id="${alertId}" class="custom-alert ${type}">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i data-lucide="${icons[type] || 'info'}" class="w-5 h-5 mr-3 flex-shrink-0"></i>
+                            <span class="font-medium">${message}</span>
+                        </div>
+                        <button onclick="closeAlert('${alertId}')" class="ml-4 text-white hover:text-gray-200 transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            alertContainer.insertAdjacentHTML('beforeend', alertHTML);
+            lucide.createIcons();
+            
+            // Show alert with animation
+            setTimeout(() => {
+                document.getElementById(alertId).classList.add('show');
+            }, 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                closeAlert(alertId);
+            }, duration);
+        }
+
+        function closeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    alert.remove();
+                }, 400);
+            }
+        }
+
+        // Check if user is logged in
+        fetch('/api/user/current')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Not logged in');
+            })
+            .then(user => {
+                currentUser = user;
+                updateNavigation();
+                updateCartCount();
+            })
+            .catch(() => {
+                // User not logged in
+            });
+
+        function updateNavigation() {
+            if (currentUser) {
+                // Desktop
+                document.getElementById('navButtons').classList.add('hidden');
+                document.getElementById('userMenu').classList.remove('hidden');
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userInitial').textContent = currentUser.name.charAt(0).toUpperCase();
+                
+                // Mobile
+                document.getElementById('mobileNavButtons').classList.add('hidden');
+                document.getElementById('mobileUserMenu').classList.remove('hidden');
+                
+                if (currentUser.role === 'instructor') {
+                    document.getElementById('instructorLink').classList.remove('hidden');
+                    document.getElementById('mobileInstructorLink').classList.remove('hidden');
+                }
+            } else {
+                // Desktop
+                document.getElementById('navButtons').classList.remove('hidden');
+                document.getElementById('userMenu').classList.add('hidden');
+                
+                // Mobile
+                document.getElementById('mobileNavButtons').classList.remove('hidden');
+                document.getElementById('mobileUserMenu').classList.add('hidden');
+            }
+        }
+
+        function updateCartCount() {
+            if (currentUser) {
+                fetch('/api/cart/count')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('cartBadge');
+                        const mobileBadge = document.getElementById('mobileCartBadge');
+                        
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.classList.remove('hidden');
+                            mobileBadge.textContent = data.count;
+                            mobileBadge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                            mobileBadge.classList.add('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating cart count:', error);
+                    });
+            }
+        }
+
+        function toggleProfileMenu() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('profileDropdown');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (!e.target.closest('#userMenu')) {
+                dropdown.classList.add('hidden');
+            }
+            
+            if (!e.target.closest('.nav-mobile') && !e.target.closest('#mobileMenu')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        function showAuthModal(mode) {
+            isLoginMode = mode === 'login';
+            const modal = document.getElementById('authModal');
+            const modalContent = document.getElementById('authModalContent');
+            const title = document.getElementById('modalTitle');
+            const nameField = document.getElementById('nameField');
+            const roleField = document.getElementById('roleField');
+            const submitText = document.getElementById('submitText');
+            const switchMode = document.getElementById('switchMode');
+
+            if (isLoginMode) {
+                title.textContent = 'Kirish';
+                nameField.classList.add('hidden');
+                roleField.classList.add('hidden');
+                submitText.textContent = 'Kirish';
+                switchMode.textContent = 'Ro\'yxatdan o\'tish';
+            } else {
+                title.textContent = 'Ro\'yxatdan o\'tish';
+                nameField.classList.remove('hidden');
+                roleField.classList.remove('hidden');
+                submitText.textContent = 'Ro\'yxatdan o\'tish';
+                switchMode.textContent = 'Kirish';
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Animation
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('authModal');
+            const modalContent = document.getElementById('authModalContent');
+            
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.getElementById('authForm').reset();
+            }, 300);
+        }
+
+        document.getElementById('switchMode').addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            showAuthModal(isLoginMode ? 'login' : 'register');
+        });
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const submitText = document.getElementById('submitText');
+            const spinner = submitBtn.querySelector('.loading-spinner');
+            
+            // Show loading
+            submitBtn.disabled = true;
+            spinner.classList.remove('hidden');
+            submitText.textContent = isLoginMode ? 'Kirilmoqda...' : 'Ro\'yxatdan o\'tilmoqda...';
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+
+            if (!isLoginMode) {
+                formData.name = document.getElementById('name').value;
+                formData.role = document.getElementById('role').value;
+            }
+
+            const endpoint = isLoginMode ? '/login' : '/register';
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    updateNavigation();
+                    updateCartCount();
+                    closeAuthModal();
+                    
+                    showAlert(
+                        isLoginMode ? 'Muvaffaqiyatli kirdingiz!' : 'Ro\'yxatdan muvaffaqiyatli o\'tdingiz!',
+                        'success'
+                    );
+                    
+                    if (currentUser.role === 'instructor') {
+                        setTimeout(() => {
+                            window.location.href = '/instructor/dashboard';
+                        }, 1000);
+                    }
+                } else {
+                    showAlert(data.error || 'Xatolik yuz berdi', 'error');
+                }
+            } catch (error) {
+                showAlert('Tarmoq xatosi yuz berdi', 'error');
+            } finally {
+                // Hide loading
+                submitBtn.disabled = false;
+                spinner.classList.add('hidden');
+                submitText.textContent = isLoginMode ? 'Kirish' : 'Ro\'yxatdan o\'tish';
+            }
+        });
+
+        async function logout() {
+            try {
+                await fetch('/logout');
+                currentUser = null;
+                updateNavigation();
+                showAlert('Muvaffaqiyatli chiqdingiz!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } catch (error) {
+                showAlert('Chiqishda xatolik yuz berdi', 'error');
+            }
+        }
+
+        // Global function to add to cart
+        window.addToCart = async function(courseId) {
+            if (!currentUser) {
+                showAlert('Savatchaga qo\'shish uchun tizimga kiring', 'info');
+                showAuthModal('login');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ course_id: courseId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert(data.message || 'Kurs savatchaga qo\'shildi!', 'success');
+                    updateCartCount();
+                } else {
+                    showAlert(data.error || 'Xatolik yuz berdi', 'error');
+                }
+            } catch (error) {
+                showAlert('Tarmoq xatosi yuz berdi', 'error');
+            }
+        };
+
+        // Search functionality
+        function setupSearch() {
+            const searchInputs = ['searchInput', 'searchInputMobile'];
+            
+            searchInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input && typeof window.handleSearch === 'function') {
+                    input.addEventListener('input', (e) => {
+                        window.handleSearch(e.target.value);
+                    });
+                }
+            });
+        }
+
+        // Initialize search when DOM is loaded
+        document.addEventListener('DOMContentLoaded', setupSearch);
+    </script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Savatcha{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Savatcha</h1>
+        <p class="text-gray-600">Tanlangan kurslaringiz</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Cart Items -->
+        <div class="lg:col-span-2">
+            <div id="cartItems">
+                <!-- Cart items will be loaded here -->
+            </div>
+            
+            <div id="emptyCart" class="hidden text-center py-12">
+                <i data-lucide="shopping-cart" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Savatcha bo'sh</h3>
+                <p class="text-gray-500 mb-6">Kurslarni ko'rish va savatchaga qo'shish uchun katalogga o'ting</p>
+                <a href="/" class="btn-primary">
+                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                    Kurslarni ko'rish
+                </a>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="lg:col-span-1">
+            <div class="card sticky top-6" id="orderSummary">
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Buyurtma xulosasi</h3>
+                
+                <div class="space-y-3 mb-6">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Kurslar soni:</span>
+                        <span id="itemCount" class="font-medium">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Jami summa:</span>
+                        <span id="totalAmount" class="font-medium">0 so'm</span>
+                    </div>
+                </div>
+                
+                <hr class="mb-6">
+                
+                <div class="flex justify-between text-lg font-bold mb-6">
+                    <span>Jami to'lov:</span>
+                    <span id="finalAmount" class="text-blue-600">0 so'm</span>
+                </div>
+                
+                <button id="checkoutBtn" onclick="checkout()" class="btn-primary w-full py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i>
+                    Sotib olish
+                </button>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-gray-500 flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i>
+                        30 kunlik pul qaytarish kafolati
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currentUser = {{ current_user_data | tojson }};
+    let cartData = { items: [], total: 0, count: 0 };
+
+    async function loadCart() {
+        try {
+            const response = await fetch('/api/cart');
+            if (!response.ok) {
+                throw new Error('Failed to load cart');
+            }
+            cartData = await response.json();
+            displayCart();
+        } catch (error) {
+            console.error('Error loading cart:', error);
+            showAlert('Savatchani yuklashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    function displayCart() {
+        const cartItemsContainer = document.getElementById('cartItems');
+        const emptyCart = document.getElementById('emptyCart');
+        const orderSummary = document.getElementById('orderSummary');
+        
+        if (cartData.items.length === 0) {
+            cartItemsContainer.innerHTML = '';
+            emptyCart.classList.remove('hidden');
+            orderSummary.classList.add('hidden');
+            return;
+        }
+        
+        emptyCart.classList.add('hidden');
+        orderSummary.classList.remove('hidden');
+        
+        cartItemsContainer.innerHTML = cartData.items.map(item => `
+            <div class="card mb-4 hover:shadow-lg transition-shadow duration-300" id="item-${item.id}">
+                <div class="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                    <img src="${item.course.image_url}" alt="${item.course.title}" 
+                         class="w-full sm:w-32 h-24 object-cover rounded-lg">
+                    
+                    <div class="flex-1 w-full">
+                        <h3 class="text-lg font-bold text-gray-800 mb-1">${item.course.title}</h3>
+                        <p class="text-gray-600 text-sm mb-2">
+                            <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                            O'qituvchi: ${item.course.instructor_name}
+                        </p>
+                        
+                        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-3">
+                            <div class="flex items-center">
+                                ${Array.from({length: 5}, (_, i) => 
+                                    `<i data-lucide="star" class="w-4 h-4 ${i < Math.floor(item.course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>`
+                                ).join('')}
+                                <span class="ml-1">(${item.course.rating.toFixed(1)})</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                                ${item.course.duration}
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <span class="text-2xl font-bold text-blue-600">
+                                ${new Intl.NumberFormat('uz-UZ').format(item.course.price)} so'm
+                            </span>
+                            
+                            <button onclick="removeFromCart(${item.id})" 
+                                    class="text-red-600 hover:text-red-700 flex items-center justify-center sm:justify-start px-4 py-2 rounded-lg hover:bg-red-50 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                                O'chirish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Update summary
+        document.getElementById('itemCount').textContent = cartData.count;
+        document.getElementById('totalAmount').textContent = new Intl.NumberFormat('uz-UZ').format(cartData.total) + ' so\'m';
+        document.getElementById('finalAmount').textContent = new Intl.NumberFormat('uz-UZ').format(cartData.total) + ' so\'m';
+        document.getElementById('checkoutBtn').disabled = cartData.count === 0;
+        
+        lucide.createIcons();
+    }
+
+    async function removeFromCart(itemId) {
+        if (!confirm('Bu kursni savatchadan o\'chirmoqchimisiz?')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/cart', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ item_id: itemId })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Remove item from DOM with animation
+                const itemElement = document.getElementById(`item-${itemId}`);
+                if (itemElement) {
+                    itemElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    itemElement.style.opacity = '0';
+                    itemElement.style.transform = 'translateX(-100%)';
+                    
+                    setTimeout(() => {
+                        loadCart();
+                        updateCartCount();
+                        showAlert('Kurs savatchadan o\'chirildi', 'success');
+                    }, 300);
+                }
+            } else {
+                showAlert(data.error || 'Kursni o\'chirishda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Kursni o\'chirishda xatolik yuz berdi', 'error');
+        }
+    }
+
+    async function checkout() {
+        if (cartData.count === 0) {
+            return;
+        }
+        
+        const confirmMessage = `${cartData.count} ta kursni ${new Intl.NumberFormat('uz-UZ').format(cartData.total)} so'mga sotib olmoqchimisiz?`;
+        if (!confirm(confirmMessage)) {
+            return;
+        }
+        
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const originalText = checkoutBtn.innerHTML;
+        
+        // Show loading
+        checkoutBtn.disabled = true;
+        checkoutBtn.innerHTML = `
+            <div class="loading-spinner mr-2"></div>
+            Sotib olinmoqda...
+        `;
+        
+        try {
+            const response = await fetch('/api/cart/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showAlert(data.message, 'success');
+                loadCart();
+                updateCartCount();
+                
+                // Show success animation
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                showAlert(data.error || 'Sotib olishda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Sotib olishda xatolik yuz berdi', 'error');
+        } finally {
+            // Restore button
+            checkoutBtn.disabled = false;
+            checkoutBtn.innerHTML = originalText;
+        }
+    }
+
+    // Load cart on page load
+    if (currentUser) {
+        loadCart();
+    } else {
+        document.getElementById('emptyCart').classList.remove('hidden');
+        document.getElementById('orderSummary').classList.add('hidden');
+        document.getElementById('emptyCart').innerHTML = `
+            <div class="text-center py-12">
+                <i data-lucide="user-x" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Tizimga kiring</h3>
+                <p class="text-gray-500 mb-6">Savatchani ko'rish uchun tizimga kirishingiz kerak</p>
+                <button onclick="showAuthModal('login')" class="btn-primary">
+                    <i data-lucide="log-in" class="w-4 h-4 mr-2"></i>
+                    Kirish
+                </button>
+            </div>
+        `;
+    }
+
+    lucide.createIcons();
+</script>
+{% endblock %}

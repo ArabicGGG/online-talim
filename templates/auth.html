@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Tizimga kirish{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-16 p-8 card">
+    <h1 class="text-2xl font-bold mb-6">Tizimga kirish</h1>
+    <form method="POST" action="/login">
+        <div class="mb-4">
+            <label class="block mb-2 text-gray-700">Email</label>
+            <input type="email" name="email" class="input-field" required />
+        </div>
+        <div class="mb-6">
+            <label class="block mb-2 text-gray-700">Parol</label>
+            <input type="password" name="password" class="input-field" required />
+        </div>
+        <button type="submit" class="btn-primary w-full">Kirish</button>
+    </form>
+    <p class="mt-4 text-center text-gray-500">Hisobingiz yo‘qmi? <a href="/register" class="text-blue-600 hover:underline">Ro‘yxatdan o‘tish</a></p>
+</div>
+{% endblock %}

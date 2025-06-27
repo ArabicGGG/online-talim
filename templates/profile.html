@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Profil - {{ user.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">Mening profilim</h1>
+        <p class="text-gray-600">Shaxsiy ma'lumotlaringizni boshqaring va rasmingizni yuklang</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Profile Info -->
+        <div class="lg:col-span-2">
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i data-lucide="user" class="w-5 h-5 mr-2 text-blue-600"></i>
+                    Shaxsiy ma'lumotlar
+                </h2>
+                
+                <form id="profileForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Ism *</label>
+                            <input type="text" id="name" class="input-field" value="{{ user.name }}" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" class="input-field bg-gray-100" value="{{ user.email }}" disabled>
+                            <p class="text-xs text-gray-500 mt-1">Email manzilini o'zgartirib bo'lmaydi</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                            <input type="tel" id="phone" class="input-field" value="{{ user.phone or '' }}" placeholder="+998901234567">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Joylashuv</label>
+                            <input type="text" id="location" class="input-field" value="{{ user.location or '' }}" placeholder="Toshkent, O'zbekiston">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Veb-sayt</label>
+                            <input type="url" id="website" class="input-field" value="{{ user.website or '' }}" placeholder="https://example.com">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                        <textarea id="bio" class="input-field resize-none h-24" placeholder="O'zingiz haqingizda qisqacha ma'lumot">{{ user.bio or '' }}</textarea>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <button type="submit" class="btn-primary hover-lift">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                            <span>Saqlash</span>
+                            <div class="loading-spinner hidden ml-2"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Profile Summary -->
+        <div class="lg:col-span-1">
+            <div class="card">
+                <div class="text-center mb-6">
+                    <div class="relative inline-block">
+                        {% if user.avatar %}
+                            <img id="avatarImage" src="{{ user.avatar }}" alt="{{ user.name }}" class="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg">
+                        {% else %}
+                            <div id="avatarPlaceholder" class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 shadow-lg">
+                                {{ user.name[0].upper() }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Avatar Upload Button -->
+                        <div class="absolute bottom-0 right-0 mb-4">
+                            <div class="file-upload">
+                                <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar()">
+                                <label for="avatarInput" class="bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer">
+                                    <i data-lucide="camera" class="w-4 h-4 text-gray-600"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold text-gray-800">{{ user.name }}</h3>
+                    <p class="text-gray-600 capitalize">{{ user.role }}</p>
+                </div>
+                
+                <div class="space-y-4 text-sm">
+                    <div class="flex items-center">
+                        <i data-lucide="mail" class="w-4 h-4 text-gray-400 mr-3"></i>
+                        <span class="text-gray-700">{{ user.email }}</span>
+                    </div>
+                    
+                    {% if user.phone %}
+                    <div class="flex items-center">
+                        <i data-lucide="phone" class="w-4 h-4 text-gray-400 mr-3"></i>
+                        <span class="text-gray-700">{{ user.phone }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.location %}
+                    <div class="flex items-center">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-gray-400 mr-3"></i>
+                        <span class="text-gray-700">{{ user.location }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.website %}
+                    <div class="flex items-center">
+                        <i data-lucide="globe" class="w-4 h-4 text-gray-400 mr-3"></i>
+                        <a href="{{ user.website }}" target="_blank" class="text-blue-600 hover:text-blue-700 transition-colors">
+                            Veb-sayt
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="flex items-center">
+                        <i data-lucide="calendar" class="w-4 h-4 text-gray-400 mr-3"></i>
+                        <span class="text-gray-700">
+                            {{ user.created_at.strftime('%B %Y') }}dan beri
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="card mt-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                    <i data-lucide="bar-chart" class="w-5 h-5 mr-2 text-blue-600"></i>
+                    Statistika
+                </h3>
+                
+                {% if user.role == 'instructor' %}
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                            Kurslar:
+                        </span>
+                        <span class="font-bold text-blue-600">{{ user.courses|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="users" class="w-4 h-4 mr-2"></i>
+                            Talabalar:
+                        </span>
+                        <span class="font-bold text-green-600">{{ user.courses|sum(attribute='students_count') or 0 }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="star" class="w-4 h-4 mr-2"></i>
+                            O'rtacha reyting:
+                        </span>
+                        <span class="font-bold text-yellow-600">
+                            {% if user.courses %}
+                                {{ "%.1f"|format((user.courses|sum(attribute='average_rating') / user.courses|length)) }}
+                            {% else %}
+                                0.0
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i>
+                            Kurslar:
+                        </span>
+                        <span class="font-bold text-blue-600">{{ user.enrollments|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="message-circle" class="w-4 h-4 mr-2"></i>
+                            Izohlar:
+                        </span>
+                        <span class="font-bold text-green-600">{{ user.comments|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                        <span class="text-gray-600 flex items-center">
+                            <i data-lucide="star" class="w-4 h-4 mr-2"></i>
+                            Baholar:
+                        </span>
+                        <span class="font-bold text-yellow-600">{{ user.ratings|length }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function uploadAvatar() {
+        const input = document.getElementById('avatarInput');
+        const file = input.files[0];
+        
+        if (!file) return;
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showAlert('Faqat rasm fayllarini yuklang', 'error');
+            return;
+        }
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showAlert('Rasm hajmi 5MB dan kichik bo\'lishi kerak', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        try {
+            showAlert('Rasm yuklanmoqda...', 'info');
+            
+            const response = await fetch('/api/upload/avatar', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Update avatar display
+                const avatarImage = document.getElementById('avatarImage');
+                const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+                
+                if (avatarImage) {
+                    avatarImage.src = data.avatar_url + '?t=' + Date.now(); // Cache bust
+                } else if (avatarPlaceholder) {
+                    // Replace placeholder with image
+                    avatarPlaceholder.outerHTML = `
+                        <img id="avatarImage" src="${data.avatar_url}" alt="Avatar" class="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-lg">
+                    `;
+                }
+                
+                // Update navigation avatar
+                if (currentUser) {
+                    currentUser.avatar = data.avatar_url;
+                    updateNavigation();
+                }
+                
+                showAlert('Profil rasmi muvaffaqiyatli yangilandi!', 'success');
+            } else {
+                showAlert(data.error || 'Rasm yuklashda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Rasm yuklashda xatolik yuz berdi', 'error');
+        }
+        
+        // Clear input
+        input.value = '';
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitText = submitBtn.querySelector('span');
+        const spinner = submitBtn.querySelector('.loading-spinner');
+        
+        // Show loading
+        submitBtn.disabled = true;
+        spinner.classList.remove('hidden');
+        submitText.textContent = 'Saqlanmoqda...';
+        
+        const formData = {
+            name: document.getElementById('name').value,
+            phone: document.getElementById('phone').value,
+            location: document.getElementById('location').value,
+            website: document.getElementById('website').value,
+            bio: document.getElementById('bio').value
+        };
+        
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                showAlert('Profil muvaffaqiyatli yangilandi!', 'success');
+                // Update navigation
+                if (currentUser) {
+                    currentUser.name = formData.name;
+                    updateNavigation();
+                }
+            } else {
+                showAlert(data.error || 'Profilni yangilashda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Profilni yangilashda xatolik yuz berdi', 'error');
+        } finally {
+            // Restore button
+            submitBtn.disabled = false;
+            spinner.classList.add('hidden');
+            submitText.textContent = 'Saqlash';
+        }
+    });
+
+    lucide.createIcons();
+</script>
+{% endblock %}

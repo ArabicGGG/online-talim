@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}O'qituvchi Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">O'qituvchi Dashboard</h1>
+            <p class="text-gray-600">Kurslaringizni boshqaring</p>
+        </div>
+        <a href="/instructor/courses/new" class="btn-primary">
+            <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+            Yangi kurs qo'shish
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="card">
+            <div class="flex items-center">
+                <div class="p-3 bg-blue-100 rounded-full">
+                    <i data-lucide="book-open" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Jami kurslar</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ courses|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex items-center">
+                <div class="p-3 bg-green-100 rounded-full">
+                    <i data-lucide="users" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Jami talabalar</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {{ courses|sum(attribute='students_count') or 0 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex items-center">
+                <div class="p-3 bg-yellow-100 rounded-full">
+                    <i data-lucide="star" class="w-6 h-6 text-yellow-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">O'rtacha reyting</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {% if courses %}
+                            {{ "%.1f"|format((courses|sum(attribute='average_rating') / courses|length)) }}
+                        {% else %}
+                            0.0
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="flex items-center">
+                <div class="p-3 bg-purple-100 rounded-full">
+                    <i data-lucide="dollar-sign" class="w-6 h-6 text-purple-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Jami daromad</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {{ "{:,}".format(courses|sum(attribute='price') * courses|sum(attribute='students_count')) }} so'm
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Table -->
+    <div class="card">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Mening kurslarim</h2>
+        </div>
+
+        {% if courses %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Kurs
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Talabalar
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Reyting
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Narx
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amallar
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for course in courses %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <img class="h-12 w-12 rounded-lg object-cover" src="{{ course.image_url }}" alt="{{ course.title }}">
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ course.title }}</div>
+                                    <div class="text-sm text-gray-500">{{ course.category }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ course.students_count }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex">
+                                    {% for i in range(5) %}
+                                        <i data-lucide="star" class="w-4 h-4 {{ 'text-yellow-400 fill-current' if i < course.average_rating else 'text-gray-300' }}"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="ml-2 text-sm text-gray-600">({{ "%.1f"|format(course.average_rating) }})</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ "{:,}".format(course.price|int) }} so'm</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ 'bg-green-100 text-green-800' if course.is_published else 'bg-yellow-100 text-yellow-800' }}">
+                                {{ 'Nashr etilgan' if course.is_published else 'Tayyorlanmoqda' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button class="text-blue-600 hover:text-blue-900 mr-4">Tahrirlash</button>
+                            <button class="text-red-600 hover:text-red-900">O'chirish</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i data-lucide="book-open" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Hali kurslar yo'q</h3>
+            <p class="text-gray-500 mb-6">Birinchi kursingizni yarating va talabalar bilan bilimingizni bo'lishing</p>
+            <a href="/instructor/courses/new" class="btn-primary">
+                Yangi kurs qo'shish
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

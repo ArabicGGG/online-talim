@@ -1,0 +1,657 @@
+{% extends "base.html" %}
+
+{% block title %}Udemy Clone - Onlayn Kurslar{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Section -->
+    <div class="mb-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+            Professional darajadagi kurslar bilan 
+            <span class="text-blue-600">o'z bilimingizni oshiring</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Eng yaxshi o'qituvchilardan o'rganing va karyerangizni rivojlantiring. 
+            Minglab kurslar, professional sertifikatlar va amaliy loyihalar.
+        </p>
+    </div>
+
+    <!-- Categories -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Kategoriyalar</h2>
+        <div class="flex flex-wrap gap-3">
+            <button class="category-btn active" data-category="all">
+                <i data-lucide="grid-3x3" class="w-4 h-4 mr-2"></i>
+                Barchasi
+            </button>
+            <button class="category-btn" data-category="Web Development">
+                <i data-lucide="code" class="w-4 h-4 mr-2"></i>
+                Web Development
+            </button>
+            <button class="category-btn" data-category="Programming">
+                <i data-lucide="terminal" class="w-4 h-4 mr-2"></i>
+                Programming
+            </button>
+            <button class="category-btn" data-category="Data Science">
+                <i data-lucide="bar-chart" class="w-4 h-4 mr-2"></i>
+                Data Science
+            </button>
+            <button class="category-btn" data-category="Design">
+                <i data-lucide="palette" class="w-4 h-4 mr-2"></i>
+                Design
+            </button>
+            <button class="category-btn" data-category="Business">
+                <i data-lucide="briefcase" class="w-4 h-4 mr-2"></i>
+                Business
+            </button>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div id="coursesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Courses will be loaded here -->
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Kurslar yuklanmoqda...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-12">
+        <i data-lucide="search" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">Kurslar topilmadi</h3>
+        <p class="text-gray-500">Qidiruv so'zini o'zgartiring yoki boshqa kategoriyani tanlang</p>
+    </div>
+</div>
+
+<!-- Course Detail Modal -->
+<div id="courseModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl max-w-6xl w-full max-h-screen overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-6">
+                <h2 id="courseTitle" class="text-3xl font-bold text-gray-800 pr-4"></h2>
+                <button onclick="closeCourseModal()" class="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="relative overflow-hidden rounded-lg mb-6">
+                        <img id="courseImage" class="w-full h-64 object-cover" alt="">
+                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                            <button class="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4 hover:bg-opacity-30 transition-all">
+                                <i data-lucide="play" class="w-8 h-8 text-white"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Kurs haqida</h3>
+                        <p id="courseDescription" class="text-gray-700 leading-relaxed"></p>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Darslar</h3>
+                        <div id="courseLessons" class="space-y-3">
+                            <!-- Lessons will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i data-lucide="message-circle" class="w-5 h-5 mr-2"></i>
+                            Izohlar (<span id="commentsCount">0</span>)
+                        </h3>
+
+                        <div id="commentForm" class="mb-6 hidden">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <textarea id="commentText" placeholder="Izoh qoldiring..." class="input-field resize-none h-20 mb-4"></textarea>
+                                <button onclick="addComment()" class="btn-primary">
+                                    <i data-lucide="send" class="w-4 h-4 mr-2"></i>
+                                    Izoh qoldirish
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="commentsList" class="space-y-4">
+                            <!-- Comments will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Ratings Section -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i data-lucide="star" class="w-5 h-5 mr-2"></i>
+                            Baholar (<span id="ratingsCount">0</span>)
+                        </h3>
+
+                        <div id="ratingForm" class="mb-6 hidden">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Baho bering:</label>
+                                    <div class="flex space-x-1" id="ratingStars">
+                                        <i data-lucide="star" class="w-6 h-6 text-gray-300 cursor-pointer rating-star hover:text-yellow-400 transition-colors" data-rating="1"></i>
+                                        <i data-lucide="star" class="w-6 h-6 text-gray-300 cursor-pointer rating-star hover:text-yellow-400 transition-colors" data-rating="2"></i>
+                                        <i data-lucide="star" class="w-6 h-6 text-gray-300 cursor-pointer rating-star hover:text-yellow-400 transition-colors" data-rating="3"></i>
+                                        <i data-lucide="star" class="w-6 h-6 text-gray-300 cursor-pointer rating-star hover:text-yellow-400 transition-colors" data-rating="4"></i>
+                                        <i data-lucide="star" class="w-6 h-6 text-gray-300 cursor-pointer rating-star hover:text-yellow-400 transition-colors" data-rating="5"></i>
+                                    </div>
+                                </div>
+                                <textarea id="reviewText" placeholder="Sharh qoldiring..." class="input-field resize-none h-24 mb-4"></textarea>
+                                <button onclick="addRating()" class="btn-primary">
+                                    <i data-lucide="star" class="w-4 h-4 mr-2"></i>
+                                    Baholash yuborish
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="ratingsList" class="space-y-4">
+                            <!-- Ratings will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1">
+                    <div class="card sticky top-6">
+                        <div class="text-center mb-6">
+                            <div id="coursePrice" class="text-3xl font-bold text-blue-600 mb-2"></div>
+                            <p class="text-gray-600">Bir martalik to'lov</p>
+                        </div>
+
+                        <button id="addToCartBtn" onclick="addToCartFromModal()" class="btn-primary w-full mb-4 py-3 text-lg">
+                            <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
+                            Savatchaga qo'shish
+                        </button>
+
+                        <button onclick="watchFreeLesson()" class="btn-secondary w-full mb-6">
+                            <i data-lucide="play" class="w-5 h-5 mr-2"></i>
+                            Bepul darsni ko'rish
+                        </button>
+
+                        <div class="space-y-4 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Instructor:</span>
+                                <span id="courseInstructor" class="font-medium"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Davomiyligi:</span>
+                                <span id="courseDuration" class="font-medium"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Daraja:</span>
+                                <span id="courseLevel" class="font-medium capitalize"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Talabalar:</span>
+                                <span id="courseStudents" class="font-medium"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Reyting:</span>
+                                <div class="flex items-center">
+                                    <div id="courseRatingStars" class="flex mr-2"></div>
+                                    <span id="courseRating" class="font-medium"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .category-btn {
+        @apply px-4 py-2 rounded-full border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-200 flex items-center;
+    }
+    
+    .category-btn.active {
+        @apply bg-blue-600 text-white border-blue-600 shadow-lg;
+    }
+    
+    .course-card {
+        @apply bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1;
+    }
+
+    .course-card:hover .course-image {
+        @apply scale-105;
+    }
+
+    .course-image {
+        @apply transition-transform duration-300;
+    }
+</style>
+
+<script>
+    let courses = [];
+    let currentCourse = null;
+    let selectedRating = 0;
+    let currentCategory = 'all';
+
+    // Load courses
+    async function loadCourses(search = '', category = 'all') {
+        try {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (category !== 'all') params.append('category', category);
+            
+            const response = await fetch(`/api/courses?${params}`);
+            courses = await response.json();
+            
+            displayCourses(courses);
+            document.getElementById('loading').classList.add('hidden');
+            
+            if (courses.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            document.getElementById('loading').innerHTML = '<p class="text-red-500">Kurslarni yuklashda xatolik yuz berdi</p>';
+            showAlert('Kurslarni yuklashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    function displayCourses(coursesToShow) {
+        const grid = document.getElementById('coursesGrid');
+        grid.innerHTML = '';
+
+        coursesToShow.forEach(course => {
+            const courseCard = createCourseCard(course);
+            grid.appendChild(courseCard);
+        });
+
+        lucide.createIcons();
+    }
+
+    function createCourseCard(course) {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+
+        const stars = Array.from({length: 5}, (_, i) => 
+            `<i data-lucide="star" class="w-4 h-4 ${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>`
+        ).join('');
+
+        card.innerHTML = `
+            <div class="relative overflow-hidden">
+                <img src="${course.image_url}" alt="${course.title}" class="w-full h-48 object-cover course-image">
+                <div class="absolute top-3 right-3 bg-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+                    ${course.level}
+                </div>
+                <div class="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                    ${course.category}
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2 min-h-[3.5rem]">${course.title}</h3>
+                <p class="text-gray-600 mb-3 line-clamp-2 min-h-[3rem]">${course.description}</p>
+                <div class="flex items-center mb-3 text-sm text-gray-500">
+                    <i data-lucide="user" class="w-4 h-4 mr-1"></i>
+                    <span class="font-medium">${course.instructor_name}</span>
+                </div>
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center space-x-1">
+                        ${stars}
+                        <span class="text-sm text-gray-600 ml-1">(${course.rating.toFixed(1)})</span>
+                    </div>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                        <div class="flex items-center">
+                            <i data-lucide="users" class="w-4 h-4 mr-1"></i>
+                            ${course.students_count}
+                        </div>
+                        <div class="flex items-center">
+                            <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                            ${course.duration}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-2xl font-bold text-blue-600">
+                        ${new Intl.NumberFormat('uz-UZ').format(course.price)} so'm
+                    </span>
+                    <div class="flex space-x-2">
+                        <button onclick="addToCart(${course.id})" class="btn-secondary text-sm px-3 py-2 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="showCourseDetail(${course.id})" class="btn-primary text-sm px-4 py-2">
+                            Ko'rish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    async function showCourseDetail(courseId) {
+        try {
+            const response = await fetch(`/api/courses/${courseId}`);
+            currentCourse = await response.json();
+            
+            // Update modal content
+            document.getElementById('courseTitle').textContent = currentCourse.title;
+            document.getElementById('courseImage').src = currentCourse.image_url;
+            document.getElementById('courseDescription').textContent = currentCourse.description;
+            document.getElementById('coursePrice').textContent = new Intl.NumberFormat('uz-UZ').format(currentCourse.price) + ' so\'m';
+            document.getElementById('courseInstructor').textContent = currentCourse.instructor_name;
+            document.getElementById('courseDuration').textContent = currentCourse.duration;
+            document.getElementById('courseLevel').textContent = currentCourse.level;
+            document.getElementById('courseStudents').textContent = currentCourse.students_count;
+            document.getElementById('courseRating').textContent = currentCourse.rating.toFixed(1);
+
+            // Update rating stars
+            const ratingStars = document.getElementById('courseRatingStars');
+            ratingStars.innerHTML = Array.from({length: 5}, (_, i) => 
+                `<i data-lucide="star" class="w-4 h-4 ${i < Math.floor(currentCourse.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>`
+            ).join('');
+
+            // Load lessons
+            const lessonsContainer = document.getElementById('courseLessons');
+            lessonsContainer.innerHTML = '';
+            currentCourse.lessons.forEach((lesson, index) => {
+                const lessonDiv = document.createElement('div');
+                lessonDiv.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer';
+                lessonDiv.onclick = () => watchLesson(lesson.id);
+                lessonDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm mr-3 font-medium">
+                            ${index + 1}
+                        </span>
+                        <div>
+                            <span class="font-medium text-gray-800">${lesson.title}</span>
+                            ${lesson.is_free ? '<span class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">Bepul</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                        ${lesson.duration}
+                        <i data-lucide="play-circle" class="w-4 h-4 ml-2 text-blue-600"></i>
+                    </div>
+                `;
+                lessonsContainer.appendChild(lessonDiv);
+            });
+
+            // Show/hide comment and rating forms based on login status
+            if (currentUser) {
+                document.getElementById('commentForm').classList.remove('hidden');
+                document.getElementById('ratingForm').classList.remove('hidden');
+            }
+
+            // Load comments and ratings
+            await loadComments(courseId);
+            await loadRatings(courseId);
+
+            // Show modal
+            document.getElementById('courseModal').classList.remove('hidden');
+            document.getElementById('courseModal').classList.add('flex');
+            
+            lucide.createIcons();
+        } catch (error) {
+            console.error('Error loading course details:', error);
+            showAlert('Kurs ma\'lumotlarini yuklashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    function watchLesson(lessonId) {
+        window.open(`/watch/${lessonId}`, '_blank');
+    }
+
+    function watchFreeLesson() {
+        if (currentCourse && currentCourse.lessons.length > 0) {
+            const freeLesson = currentCourse.lessons.find(lesson => lesson.is_free);
+            if (freeLesson) {
+                watchLesson(freeLesson.id);
+            } else {
+                showAlert('Bu kursda bepul darslar yo\'q', 'info');
+            }
+        }
+    }
+
+    async function loadComments(courseId) {
+        try {
+            const response = await fetch(`/api/courses/${courseId}/comments`);
+            const comments = await response.json();
+            
+            document.getElementById('commentsCount').textContent = comments.length;
+            
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = '';
+            
+            if (comments.length === 0) {
+                commentsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="message-circle" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+                        <p>Hali izohlar yo'q. Birinchi bo'lib izoh qoldiring!</p>
+                    </div>
+                `;
+            } else {
+                comments.forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'border-b border-gray-100 pb-4 last:border-b-0';
+                    commentDiv.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
+                                ${comment.user_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-medium text-gray-800">${comment.user_name}</h4>
+                                    <span class="text-sm text-gray-500">${new Date(comment.created_at).toLocaleDateString('uz-UZ')}</span>
+                                </div>
+                                <p class="text-gray-700 leading-relaxed">${comment.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    commentsList.appendChild(commentDiv);
+                });
+            }
+            
+            lucide.createIcons();
+        } catch (error) {
+            console.error('Error loading comments:', error);
+            showAlert('Izohlarni yuklashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    async function loadRatings(courseId) {
+        try {
+            const response = await fetch(`/api/courses/${courseId}/ratings`);
+            const ratings = await response.json();
+            
+            document.getElementById('ratingsCount').textContent = ratings.length;
+            
+            const ratingsList = document.getElementById('ratingsList');
+            ratingsList.innerHTML = '';
+            
+            if (ratings.length === 0) {
+                ratingsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="star" class="w-12 h-12 mx-auto mb-4 text-gray-300"></i>
+                        <p>Hali baholar yo'q. Birinchi bo'lib baholang!</p>
+                    </div>
+                `;
+            } else {
+                ratings.forEach(rating => {
+                    const ratingDiv = document.createElement('div');
+                    ratingDiv.className = 'border-b border-gray-100 pb-4 last:border-b-0';
+                    
+                    const stars = Array.from({length: 5}, (_, i) => 
+                        `<i data-lucide="star" class="w-4 h-4 ${i < rating.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>`
+                    ).join('');
+                    
+                    ratingDiv.innerHTML = `
+                        <div class="flex items-start space-x-4">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
+                                ${rating.user_name.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <h4 class="font-medium text-gray-800">${rating.user_name}</h4>
+                                    <div class="flex">${stars}</div>
+                                    <span class="text-sm text-gray-500">${new Date(rating.created_at).toLocaleDateString('uz-UZ')}</span>
+                                </div>
+                                <p class="text-gray-700 leading-relaxed">${rating.review}</p>
+                            </div>
+                        </div>
+                    `;
+                    ratingsList.appendChild(ratingDiv);
+                });
+            }
+            
+            lucide.createIcons();
+        } catch (error) {
+            console.error('Error loading ratings:', error);
+            showAlert('Baholarni yuklashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    function closeCourseModal() {
+        document.getElementById('courseModal').classList.add('hidden');
+        document.getElementById('courseModal').classList.remove('flex');
+        currentCourse = null;
+        selectedRating = 0;
+        document.getElementById('commentText').value = '';
+        document.getElementById('reviewText').value = '';
+        updateRatingStars();
+    }
+
+    function addToCartFromModal() {
+        if (currentCourse) {
+            addToCart(currentCourse.id);
+        }
+    }
+
+    async function addComment() {
+        if (!currentUser) {
+            showAlert('Izoh qoldirish uchun tizimga kiring', 'info');
+            showAuthModal('login');
+            return;
+        }
+
+        const content = document.getElementById('commentText').value.trim();
+        if (!content) {
+            showAlert('Izoh matnini kiriting', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/courses/${currentCourse.id}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('commentText').value = '';
+                await loadComments(currentCourse.id);
+                showAlert('Izoh muvaffaqiyatli qo\'shildi!', 'success');
+            } else {
+                showAlert(data.error || 'Izoh qoldirishda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Izoh qoldirishda xatolik yuz berdi', 'error');
+        }
+    }
+
+    async function addRating() {
+        if (!currentUser) {
+            showAlert('Baholash uchun tizimga kiring', 'info');
+            showAuthModal('login');
+            return;
+        }
+
+        if (selectedRating === 0) {
+            showAlert('Baho bering', 'error');
+            return;
+        }
+
+        const review = document.getElementById('reviewText').value.trim();
+        if (!review) {
+            showAlert('Sharh yozing', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/courses/${currentCourse.id}/ratings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ rating: selectedRating, review })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('reviewText').value = '';
+                selectedRating = 0;
+                updateRatingStars();
+                await loadRatings(currentCourse.id);
+                // Reload course to update rating
+                await showCourseDetail(currentCourse.id);
+                showAlert('Baho muvaffaqiyatli qo\'shildi!', 'success');
+            } else {
+                showAlert(data.error || 'Baholashda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Baholashda xatolik yuz berdi', 'error');
+        }
+    }
+
+    function updateRatingStars() {
+        const stars = document.querySelectorAll('.rating-star');
+        stars.forEach((star, index) => {
+            if (index < selectedRating) {
+                star.classList.remove('text-gray-300');
+                star.classList.add('text-yellow-400');
+            } else {
+                star.classList.remove('text-yellow-400');
+                star.classList.add('text-gray-300');
+            }
+        });
+    }
+
+    // Rating stars click handlers
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('rating-star')) {
+            selectedRating = parseInt(e.target.dataset.rating);
+            updateRatingStars();
+        }
+    });
+
+    // Category filtering
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('category-btn') || e.target.closest('.category-btn')) {
+            const btn = e.target.classList.contains('category-btn') ? e.target : e.target.closest('.category-btn');
+            
+            // Update active category
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Filter courses
+            currentCategory = btn.dataset.category;
+            loadCourses('', currentCategory);
+        }
+    });
+
+    // Search functionality
+    window.handleSearch = function(searchTerm) {
+        loadCourses(searchTerm, currentCategory);
+    };
+
+    // Load courses on page load
+    loadCourses();
+    lucide.createIcons();
+</script>
+{% endblock %}

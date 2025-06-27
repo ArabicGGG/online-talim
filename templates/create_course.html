@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}Yangi kurs yaratish{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">Yangi kurs yaratish</h1>
+        <p class="text-gray-600">Talabalar uchun ajoyib kurs yarating va videolar yuklang</p>
+    </div>
+
+    <form id="courseForm" class="space-y-8" enctype="multipart/form-data">
+        <!-- Basic Information -->
+        <div class="card">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="info" class="w-5 h-5 mr-2 text-blue-600"></i>
+                Asosiy ma'lumotlar
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kurs nomi *</label>
+                    <input type="text" name="title" class="input-field" placeholder="Masalan: React.js Asoslari" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kategoriya *</label>
+                    <select name="category" class="input-field" required>
+                        <option value="">Kategoriyani tanlang</option>
+                        <option value="Web Development">Web Development</option>
+                        <option value="Programming">Programming</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Design">Design</option>
+                        <option value="Business">Business</option>
+                        <option value="Marketing">Marketing</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Daraja *</label>
+                    <select name="level" class="input-field" required>
+                        <option value="">Darajani tanlang</option>
+                        <option value="beginner">Boshlang'ich</option>
+                        <option value="intermediate">O'rta</option>
+                        <option value="advanced">Yuqori</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Davomiyligi *</label>
+                    <input type="text" name="duration" class="input-field" placeholder="Masalan: 8 soat" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Narx (so'm) *</label>
+                    <input type="number" name="price" class="input-field" placeholder="299000" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kurs rasmi</label>
+                    <div class="file-upload">
+                        <input type="file" name="course_image" accept="image/*" id="courseImageInput">
+                        <label for="courseImageInput" class="file-upload-label">
+                            <i data-lucide="upload" class="w-4 h-4"></i>
+                            <span>Rasm yuklash</span>
+                        </label>
+                    </div>
+                    <div id="courseImagePreview" class="mt-2 hidden">
+                        <img class="w-32 h-20 object-cover rounded-lg border" alt="Course preview">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Qisqa tavsif *</label>
+                <textarea name="short_description" class="input-field resize-none h-20" placeholder="Kurs haqida qisqacha ma'lumot (maksimal 500 belgi)" maxlength="500" required></textarea>
+            </div>
+            
+            <div class="mt-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">To'liq tavsif *</label>
+                <textarea name="description" class="input-field resize-none h-32" placeholder="Kurs haqida batafsil ma'lumot" required></textarea>
+            </div>
+        </div>
+
+        <!-- Course Content -->
+        <div class="card">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="video" class="w-5 h-5 mr-2 text-blue-600"></i>
+                Kurs tarkibi va videolar
+            </h2>
+            
+            <div id="lessonsContainer">
+                <div class="lesson-item border border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-medium text-gray-800 flex items-center">
+                            <i data-lucide="play-circle" class="w-5 h-5 mr-2 text-blue-600"></i>
+                            Dars 1
+                        </h3>
+                        <button type="button" onclick="removeLesson(this)" class="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Dars nomi *</label>
+                            <input type="text" name="lesson_title_0" class="input-field lesson-title" placeholder="Dars nomi" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Davomiyligi</label>
+                            <input type="text" name="lesson_duration_0" class="input-field lesson-duration" placeholder="30 min">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Dars tarkibi</label>
+                        <textarea name="lesson_content_0" class="input-field resize-none h-20 lesson-content" placeholder="Dars haqida ma'lumot"></textarea>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Video yuklash</label>
+                        <div class="file-upload">
+                            <input type="file" name="lesson_video_0" accept="video/*" class="lesson-video" onchange="handleVideoUpload(this, 0)">
+                            <label class="file-upload-label">
+                                <i data-lucide="video" class="w-4 h-4"></i>
+                                <span>Video yuklash</span>
+                            </label>
+                        </div>
+                        <div class="video-preview mt-2 hidden">
+                            <div class="bg-gray-100 rounded-lg p-4 flex items-center space-x-3">
+                                <i data-lucide="video" class="w-8 h-8 text-blue-600"></i>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800 video-name"></p>
+                                    <p class="text-sm text-gray-600 video-size"></p>
+                                </div>
+                                <div class="progress-bar w-24 hidden">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" name="lesson_is_free_0" class="lesson-free mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-700">Bu dars bepul</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" onclick="addLesson()" class="btn-secondary hover-lift">
+                <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                Yangi dars qo'shish
+            </button>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex justify-end space-x-4">
+            <a href="/instructor/dashboard" class="btn-secondary hover-lift">
+                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
+                Bekor qilish
+            </a>
+            <button type="submit" class="btn-primary hover-lift" id="submitBtn">
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                <span>Kursni saqlash</span>
+                <div class="loading-spinner hidden ml-2"></div>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    let lessonCount = 1;
+
+    function addLesson() {
+        const container = document.getElementById('lessonsContainer');
+        const lessonDiv = document.createElement('div');
+        lessonDiv.className = 'lesson-item border border-gray-200 rounded-xl p-6 mb-6 bg-gray-50';
+        lessonDiv.innerHTML = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-medium text-gray-800 flex items-center">
+                    <i data-lucide="play-circle" class="w-5 h-5 mr-2 text-blue-600"></i>
+                    Dars ${lessonCount + 1}
+                </h3>
+                <button type="button" onclick="removeLesson(this)" class="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dars nomi *</label>
+                    <input type="text" name="lesson_title_${lessonCount}" class="input-field lesson-title" placeholder="Dars nomi" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Davomiyligi</label>
+                    <input type="text" name="lesson_duration_${lessonCount}" class="input-field lesson-duration" placeholder="30 min">
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dars tarkibi</label>
+                <textarea name="lesson_content_${lessonCount}" class="input-field resize-none h-20 lesson-content" placeholder="Dars haqida ma'lumot"></textarea>
+            </div>
+            
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Video yuklash</label>
+                <div class="file-upload">
+                    <input type="file" name="lesson_video_${lessonCount}" accept="video/*" class="lesson-video" onchange="handleVideoUpload(this, ${lessonCount})">
+                    <label class="file-upload-label">
+                        <i data-lucide="video" class="w-4 h-4"></i>
+                        <span>Video yuklash</span>
+                    </label>
+                </div>
+                <div class="video-preview mt-2 hidden">
+                    <div class="bg-gray-100 rounded-lg p-4 flex items-center space-x-3">
+                        <i data-lucide="video" class="w-8 h-8 text-blue-600"></i>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800 video-name"></p>
+                            <p class="text-sm text-gray-600 video-size"></p>
+                        </div>
+                        <div class="progress-bar w-24 hidden">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <label class="flex items-center">
+                    <input type="checkbox" name="lesson_is_free_${lessonCount}" class="lesson-free mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm text-gray-700">Bu dars bepul</span>
+                </label>
+            </div>
+        `;
+        container.appendChild(lessonDiv);
+        lessonCount++;
+        lucide.createIcons();
+    }
+
+    function removeLesson(button) {
+        const lessonItems = document.querySelectorAll('.lesson-item');
+        if (lessonItems.length > 1) {
+            button.closest('.lesson-item').remove();
+        } else {
+            showAlert('Kamida bitta dars bo\'lishi kerak', 'warning');
+        }
+    }
+
+    function handleVideoUpload(input, lessonIndex) {
+        const file = input.files[0];
+        if (file) {
+            const preview = input.closest('.lesson-item').querySelector('.video-preview');
+            const videoName = preview.querySelector('.video-name');
+            const videoSize = preview.querySelector('.video-size');
+            
+            videoName.textContent = file.name;
+            videoSize.textContent = formatFileSize(file.size);
+            preview.classList.remove('hidden');
+            
+            showAlert('Video tanlandi: ' + file.name, 'success');
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Handle course image preview
+    document.getElementById('courseImageInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const preview = document.getElementById('courseImagePreview');
+            const img = preview.querySelector('img');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            
+            showAlert('Kurs rasmi tanlandi', 'success');
+        }
+    });
+
+    document.getElementById('courseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = submitBtn.querySelector('span');
+        const spinner = submitBtn.querySelector('.loading-spinner');
+        
+        // Show loading
+        submitBtn.disabled = true;
+        spinner.classList.remove('hidden');
+        submitText.textContent = 'Saqlanmoqda...';
+        
+        try {
+            const formData = new FormData();
+            
+            // Add basic course data
+            const basicFields = ['title', 'description', 'short_description', 'price', 'duration', 'level', 'category'];
+            basicFields.forEach(field => {
+                const value = document.querySelector(`[name="${field}"]`).value;
+                formData.append(field, value);
+            });
+            
+            // Add course image
+            const courseImage = document.querySelector('[name="course_image"]').files[0];
+            if (courseImage) {
+                formData.append('course_image', courseImage);
+            }
+            
+            // Add lesson count
+            formData.append('lesson_count', lessonCount);
+            
+            // Add lessons data
+            for (let i = 0; i < lessonCount; i++) {
+                const titleInput = document.querySelector(`[name="lesson_title_${i}"]`);
+                const durationInput = document.querySelector(`[name="lesson_duration_${i}"]`);
+                const contentInput = document.querySelector(`[name="lesson_content_${i}"]`);
+                const videoInput = document.querySelector(`[name="lesson_video_${i}"]`);
+                const freeInput = document.querySelector(`[name="lesson_is_free_${i}"]`);
+                
+                if (titleInput && titleInput.value.trim()) {
+                    formData.append(`lesson_title_${i}`, titleInput.value);
+                    formData.append(`lesson_duration_${i}`, durationInput ? durationInput.value : '');
+                    formData.append(`lesson_content_${i}`, contentInput ? contentInput.value : '');
+                    formData.append(`lesson_is_free_${i}`, freeInput ? freeInput.checked : false);
+                    
+                    // Add video file
+                    if (videoInput && videoInput.files[0]) {
+                        formData.append(`lesson_video_${i}`, videoInput.files[0]);
+                    }
+                }
+            }
+            
+            const response = await fetch('/instructor/courses/new', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert('Kurs muvaffaqiyatli yaratildi!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/instructor/dashboard';
+                }, 1500);
+            } else {
+                showAlert(result.error || 'Kurs yaratishda xatolik yuz berdi', 'error');
+            }
+        } catch (error) {
+            showAlert('Kurs yaratishda xatolik yuz berdi', 'error');
+        } finally {
+            // Restore button
+            submitBtn.disabled = false;
+            spinner.classList.add('hidden');
+            submitText.textContent = 'Kursni saqlash';
+        }
+    });
+
+    lucide.createIcons();
+</script>
+{% endblock %}
